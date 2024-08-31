@@ -38,7 +38,7 @@ class Validate : CliktCommand(name = "validate", help = "Validate a LevelZ save 
         .multiple()
 
     override fun run() = runBlocking(Dispatchers.IO) {
-        echo("Validating $input...")
+        echo("Validating '$input'...")
 
         val file = localCurrentDirVfs[input]
         if (!file.exists())

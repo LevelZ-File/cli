@@ -82,11 +82,11 @@ class Edit : CliktCommand(name = "edit", help = "Edit a LevelZ save file") {
                 return@runBlocking
             }
 
+            echo("Editing '$input'...")
             val outputFile = localCurrentDirVfs[output!!]
             if (outputFile.exists() && !override)
                 throw InvalidFileFormat(outputFile.path, "File already exists: $output (use '-o' flag to override)")
 
-            echo("Editing $input...")
             outputFile.writeString(export)
             echo("Edited '${outputFile.absolutePath}'")
         } catch (e: ParseException) {

@@ -58,11 +58,11 @@ class Create : CliktCommand(name = "create", help = "Generates a new LevelZ save
             return@runBlocking
         }
 
+        echo("Creating '$output'...")
         val file = localCurrentDirVfs[output!!]
         if (file.exists() && !override)
             throw PrintMessage("File already exists: $output (use '-o' flag to override)", 1, true)
 
-        echo("Creating $output...")
         file.writeString(export)
         echo("Created '${file.absolutePath}'")
     }
