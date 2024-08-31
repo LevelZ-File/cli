@@ -1,0 +1,83 @@
+name: Build Project
+
+on:
+  push:
+    branches: [ master, ver/* ]
+  pull_request:
+    branches: [ master, ver/* ]
+
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    name: Gradle Setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v4
+      - name: Change Permissions
+        run: chmod +x ./gradlew
+      - name: Gradle Information
+        run: ./gradlew project tasks dependencies
+
+  build:
+    runs-on: ${{ matrix.os }}
+    needs: setup
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            tasks: "linuxX64Binaries linuxArm64Binaries"
+          - os: windows-latest
+            tasks: "mingwX64Binaries"
+          - os: macos-latest
+            tasks: "macosX64Binaries macosArm64Binaries"
+
+    name: Build (${{ matrix.os }})
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change Permissions
+        run: chmod +x ./gradlew
+      - name: Build with Gradle
+        run: ./gradlew clean ${{ matrix.tasks }}
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: levelz-cli-${{ matrix.os }}
+          path: build/bin/*
+
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: setup
+
+    name: Test Project
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change Permissions
+        run: chmod +x ./gradlew
+      - name: Gradle Test
+        run: ./gradlew allTests
+
+  publish:
+    runs-on: macos-latest
+    needs: [build, test]
+    name: Publish to Repository
+    if: ${{ github.event_name != 'pull_request' && github.ref_name == 'master' }}
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change Permissions
+        run: chmod +x ./gradlew
+      - name: Publish to Repository
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: ./gradlew clean publish -Psnapshot=true
