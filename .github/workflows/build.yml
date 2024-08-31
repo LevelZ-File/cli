@@ -38,10 +38,13 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            tag: linux
             tasks: "linuxX64Binaries linuxArm64Binaries"
           - os: windows-latest
+            tag: windows
             tasks: "mingwX64Binaries"
           - os: macos-latest
+            tag: macos
             tasks: "macosX64Binaries macosArm64Binaries"
 
     name: Build (${{ matrix.os }})
@@ -60,7 +63,7 @@ jobs:
       - name: Upload Executable
         uses: actions/upload-artifact@v4
         with:
-          name: levelz-cli-${{ matrix.os }}
+          name: levelz-cli-${{ matrix.tag }}
           path: build/bin/*
 
 
