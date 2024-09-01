@@ -1,0 +1,8 @@
+@type 2
+@spawn [2, 2]
+@scroll vertical-up
+---
+grass: [0, 0]*[0, 1]
+stone: (-5, 5, 0, 0)^[0, 0]
+magma: (-5, 5, 0, 0)^[0, -1]
+end

@@ -8,7 +8,7 @@ plugins {
 
 val v = "0.1.0"
 
-group = "xyz.calcugames.levelz.cli"
+group = "xyz.calcugames"
 version = if (project.hasProperty("snapshot")) "$v-SNAPSHOT" else v
 description = "The official CLI for the LevelZ File Format"
 
@@ -23,6 +23,8 @@ dependencies {
     commonMainImplementation("com.github.ajalt.clikt:clikt:4.4.0")
     commonMainImplementation("xyz.calcugames:levelz-kt:0.2.4")
     commonMainImplementation("com.soywiz:korlibs-io:6.0.1")
+
+    commonTestImplementation(kotlin("test"))
 }
 
 kotlin {
@@ -41,6 +43,27 @@ kotlin {
 
                 entryPoint("xyz.calcugames.levelz.cli.main")
             }
+        }
+    }
+}
+
+tasks {
+    register("copyTestResources", Copy::class) {
+        from("src/commonTest/resources")
+        into(layout.buildDirectory.dir("bin/test-resources"))
+    }
+
+    named("allTests") {
+        dependsOn("copyTestResources")
+    }
+
+    withType<Test> {
+        dependsOn("copyTestResources")
+
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+            showStandardStreams = true
         }
     }
 }
