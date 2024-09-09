@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     commonMainImplementation("com.github.ajalt.clikt:clikt:4.4.0")
-    commonMainImplementation("xyz.calcugames:levelz-kt:0.2.4")
+    commonMainImplementation("xyz.calcugames:levelz-kt:0.3.0")
     commonMainImplementation("com.soywiz:korlibs-io:6.0.1")
 
     commonTestImplementation(kotlin("test"))
