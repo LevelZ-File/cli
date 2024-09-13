@@ -59,7 +59,7 @@ class Edit : CliktCommand(name = "edit", help = "Edit a LevelZ save file") {
             val dimension = level.dimension
             val builder = if (dimension.is2D) LevelBuilder.create2D() else LevelBuilder.create3D()
 
-            val newHeaders = (level.getHeaders() + headers.toMap())
+            val newHeaders = (level.headers + headers.toMap())
                 .filter { (header, _) -> header !in removedHeaders }
 
             for ((header, value) in newHeaders)

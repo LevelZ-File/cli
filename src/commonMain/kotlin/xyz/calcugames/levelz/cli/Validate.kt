@@ -65,7 +65,7 @@ class Validate : CliktCommand(name = "validate", help = "Validate a LevelZ save 
                     throw PrintMessage("Spawn point mismatch: Expected '$spawn0', got '${level.spawn}'", 1, true)
             }
 
-            val actualHeaders = level.getHeaders()
+            val actualHeaders = level.getAllHeaders()
             for ((header, value) in headers) {
                 if (actualHeaders[header] != value)
                     throw PrintMessage("Header mismatch for '$header': Expected '$value', got '${actualHeaders[header]}'", 1, true)
