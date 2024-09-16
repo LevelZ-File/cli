@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
 }
 
-val v = "0.1.0"
+val v = "0.1.1"
 
 group = "xyz.calcugames"
 version = if (project.hasProperty("snapshot")) "$v-SNAPSHOT" else v
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    commonMainImplementation("com.github.ajalt.clikt:clikt:4.4.0")
-    commonMainImplementation("xyz.calcugames:levelz-kt:0.3.1")
+    commonMainImplementation("com.github.ajalt.clikt:clikt:5.0.0")
+    commonMainImplementation("xyz.calcugames:levelz-kt:0.3.2")
     commonMainImplementation("com.soywiz:korlibs-io:6.0.1")
 
     commonTestImplementation(kotlin("test"))

@@ -1,8 +1,6 @@
 package xyz.calcugames.levelz.cli
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.FileNotFound
-import com.github.ajalt.clikt.core.InvalidFileFormat
+import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.*
@@ -19,7 +17,7 @@ import xyz.calcugames.levelz.coord.Coordinate3D
 import xyz.calcugames.levelz.parser.ParseException
 import xyz.calcugames.levelz.parser.parseLevel
 
-class Edit : CliktCommand(name = "edit", help = "Edit a LevelZ save file") {
+class Edit : CliktCommand(name = "edit") {
     private val input by argument(help = "The save file to edit")
     private val output by argument(help = "The path to output the save to. If empty, the save will be output to the console")
         .optional()
@@ -44,6 +42,8 @@ class Edit : CliktCommand(name = "edit", help = "Edit a LevelZ save file") {
     private val override by option("-o", "--override", help = "Override the output file if it already exists")
         .flag("--no-override")
 
+    override fun help(context: Context): String = context.theme.info("Edit a LevelZ save file")
+
     override fun run() = runBlocking(Dispatchers.IO) {
         val file = localCurrentDirVfs[input]
         if (!file.exists())
@@ -57,18 +57,27 @@ class Edit : CliktCommand(name = "edit", help = "Edit a LevelZ save file") {
         try {
             val level = parseLevel(save)
             val dimension = level.dimension
-            val builder = if (dimension.is2D) LevelBuilder.create2D() else LevelBuilder.create3D()
+            val builder = LevelBuilder.create(dimension)
 
             val newHeaders = (level.headers + headers.toMap())
                 .filter { (header, _) -> header !in removedHeaders }
 
-            for ((header, value) in newHeaders)
-                builder.header(header, value)
+            for ((header, value) in newHeaders) {
+                var value0 = value
+                if (header == "spawn" && value == "default")
+                    value0 = if (dimension.is2D) Coordinate2D(0, 0).toString() else Coordinate3D(0, 0, 0).toString()
+
+                builder.header(header, value0)
+            }
 
             val newBlocks = level.blocks.toMutableList()
             for ((block, value) in blocks) {
-                val coordinate = if (dimension.is2D) Coordinate2D.fromString(value) else Coordinate3D.fromString(value)
-                newBlocks.add(LevelObject(Block(block), coordinate))
+                try {
+                    val coordinate = if (dimension.is2D) Coordinate2D.fromString(value) else Coordinate3D.fromString(value)
+                    newBlocks.add(LevelObject(Block(block), coordinate))
+                } catch (e: IllegalArgumentException) {
+                    throw InvalidFileFormat(file.path, "Invalid coordinate: $value")
+                }
             }
 
             for (block in newBlocks.filter { it.block.name !in removedBlocks })

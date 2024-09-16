@@ -1,7 +1,9 @@
 package xyz.calcugames.levelz.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.PrintMessage
+import com.github.ajalt.clikt.core.theme
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.*
@@ -16,7 +18,7 @@ import xyz.calcugames.levelz.builder.LevelBuilder
 import xyz.calcugames.levelz.coord.Coordinate2D
 import xyz.calcugames.levelz.coord.Coordinate3D
 
-class Create : CliktCommand(name = "create", help = "Generates a new LevelZ save file") {
+class Create : CliktCommand(name = "create") {
     private val output by argument(help = "The path to output the save to. If empty, the save will be output to the console")
         .optional()
 
@@ -39,15 +41,26 @@ class Create : CliktCommand(name = "create", help = "Generates a new LevelZ save
     private val override by option("-o", "--override", help = "Override the file if it already exists")
         .flag("--no-override")
 
+    override fun help(context: Context): String = context.theme.info("Generates a new LevelZ save file")
+
     override fun run() = runBlocking(Dispatchers.IO) {
         val builder = if (dimension == 2) LevelBuilder.create2D() else LevelBuilder.create3D()
 
-        for ((header, value) in headers)
-            builder.header(header, value)
+        for ((header, value) in headers) {
+            var value0 = value
+            if (header == "spawn" && value == "default")
+                value0 = if (dimension == 2) Coordinate2D(0, 0).toString() else Coordinate3D(0, 0, 0).toString()
+
+            builder.header(header, value0)
+        }
 
         for ((block, value) in blocks) {
-            val coordinate = if (dimension == 2) Coordinate2D.fromString(value) else Coordinate3D.fromString(value)
-            builder.block(block, coordinate)
+            try {
+                val coordinate = if (dimension == 2) Coordinate2D.fromString(value) else Coordinate3D.fromString(value)
+                builder.block(block, coordinate)
+            } catch (e: IllegalArgumentException) {
+                throw PrintMessage("Invalid coordinate: $value", 1, true)
+            }
         }
 
         val level = builder.build()

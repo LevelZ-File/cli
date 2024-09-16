@@ -1,9 +1,6 @@
 package xyz.calcugames.levelz.cli
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.FileNotFound
-import com.github.ajalt.clikt.core.InvalidFileFormat
-import com.github.ajalt.clikt.core.PrintMessage
+import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.int
@@ -17,7 +14,7 @@ import xyz.calcugames.levelz.coord.Coordinate3D
 import xyz.calcugames.levelz.parser.ParseException
 import xyz.calcugames.levelz.parser.parseLevel
 
-class Validate : CliktCommand(name = "validate", help = "Validate a LevelZ save file") {
+class Validate : CliktCommand(name = "validate") {
     private val input by argument(help = "The save file to validate")
 
     private val dimension by option("-d", "--dimension", help = "The dimension to validate the save file against")
@@ -36,6 +33,8 @@ class Validate : CliktCommand(name = "validate", help = "Validate a LevelZ save 
     private val headers by option("-h", "--header", help = "Validates a header value in the save file")
         .pair()
         .multiple()
+
+    override fun help(context: Context): String = context.theme.info("Validate a LevelZ save file")
 
     override fun run() = runBlocking(Dispatchers.IO) {
         echo("Validating '$input'...")
@@ -59,10 +58,13 @@ class Validate : CliktCommand(name = "validate", help = "Validate a LevelZ save 
                 throw PrintMessage("Minimum coordinates mismatch: Expected $minBlocks+, got ${level.blocks.size}", 1, true)
 
             if (spawn != null) {
-                val spawn0 = if (level.dimension.is2D) Coordinate2D.fromString(spawn!!) else Coordinate3D.fromString(spawn!!)
-
-                if (level.spawn != spawn0)
-                    throw PrintMessage("Spawn point mismatch: Expected '$spawn0', got '${level.spawn}'", 1, true)
+                try {
+                    val spawn0 = if (level.dimension.is2D) Coordinate2D.fromString(spawn!!) else Coordinate3D.fromString(spawn!!)
+                    if (level.spawn != spawn0)
+                        throw PrintMessage("Spawn point mismatch: Expected '$spawn0', got '${level.spawn}'", 1, true)
+                } catch (e: IllegalArgumentException) {
+                    throw PrintMessage("Invalid coordinate: ${spawn!!}", 1, true)
+                }
             }
 
             val actualHeaders = level.getAllHeaders()
