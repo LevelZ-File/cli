@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    commonMainImplementation("com.github.ajalt.clikt:clikt:5.0.2")
+    commonMainImplementation("com.github.ajalt.clikt:clikt:5.0.3")
     commonMainImplementation("xyz.calcugames:levelz-kt:0.3.3")
     commonMainImplementation("com.soywiz:korlibs-io:6.0.1")
 
