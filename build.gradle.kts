@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 plugins {
-    kotlin("multiplatform") version "2.2.0"
+    kotlin("multiplatform") version "2.2.20"
 
     `maven-publish`
 }
@@ -22,7 +22,7 @@ repositories {
 dependencies {
     commonMainImplementation("com.github.ajalt.clikt:clikt:5.0.3")
     commonMainImplementation("xyz.calcugames:levelz-kt:0.3.3")
-    commonMainImplementation("com.soywiz:korlibs-io:6.0.1")
+    commonMainImplementation("com.soywiz:korlibs-io:6.0.2")
 
     commonTestImplementation(kotlin("test"))
 }
